@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job {{ job_id }} result</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+body{
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 300;
+	font-size: 15px;
+	line-height: 1.7;
+	color: #ececee;
+	background-color: #1f2029;
+  background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat-back.svg');
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 4%;
+  height: 100vh;
+  width: 100%;
+}
+.section-center{
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  z-index: 6;
+  text-align: center;
+  transform: translateY(-50%);
+}
+h1{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 70px;
+  line-height: 1;
+  color: #ffeba7;
+  text-align: center;
+  -webkit-text-stroke: 2px #ffeba7;
+  text-stroke: 2px #ffeba7;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  color: transparent;
+}
+
+[type="checkbox"]:checked,
+[type="checkbox"]:not(:checked){
+  position: absolute;
+  left: -9999px;
+}
+.menu-icon:checked + label,
+.menu-icon:not(:checked) + label{
+  position: fixed;
+  top: 63px;
+  right: 75px;
+  display: block;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+.menu-icon:checked + label:before,
+.menu-icon:not(:checked) + label:before{
+  position: absolute;
+  content: '';
+  display: block;
+  width: 30px;
+  height: 20px;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  border-top: 2px solid #ececee;
+  border-bottom: 2px solid #ececee;
+  transition: border-width 100ms 1500ms ease,
+              top 100ms 1600ms cubic-bezier(0.23, 1, 0.32, 1),
+              height 100ms 1600ms cubic-bezier(0.23, 1, 0.32, 1),
+              background-color 200ms ease,
+              transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.menu-icon:checked + label:after,
+.menu-icon:not(:checked) + label:after{
+  position: absolute;
+  content: '';
+  display: block;
+  width: 22px;
+  height: 2px;
+  z-index: 20;
+  top: 10px;
+  right: 4px;
+  background-color: #ececee;
+  margin-top: -1px;
+  transition: width 100ms 1750ms ease,
+              right 100ms 1750ms ease,
+              margin-top 100ms ease,
+              transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.menu-icon:checked + label:before{
+  top: 10px;
+  transform: rotate(45deg);
+  height: 2px;
+  background-color: #ececee;
+  border-width: 0;
+  transition: border-width 100ms 340ms ease,
+              top 100ms 300ms cubic-bezier(0.23, 1, 0.32, 1),
+              height 100ms 300ms cubic-bezier(0.23, 1, 0.32, 1),
+              background-color 200ms 500ms ease,
+              transform 200ms 1700ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.menu-icon:checked + label:after{
+  width: 30px;
+  margin-top: 0;
+  right: 0;
+  transform: rotate(-45deg);
+  transition: width 100ms ease,
+              right 100ms ease,
+              margin-top 100ms 500ms ease,
+              transform 200ms 1700ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nav{
+  position: fixed;
+  top: 33px;
+  right: 50px;
+  display: block;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  margin: 0;
+  z-index: 9;
+  overflow: hidden;
+  box-shadow: 0 8px 30px 0 rgba(0,0,0,0.3);
+  background-color: #353746;
+  animation: border-transform 7s linear infinite;
+  transition: top 350ms 1100ms cubic-bezier(0.23, 1, 0.32, 1),
+              right 350ms 1100ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 250ms 1100ms ease,
+              width 650ms 400ms cubic-bezier(0.23, 1, 0.32, 1),
+              height 650ms 400ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes border-transform{
+    0%,100% { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
+  14% { border-radius: 40% 60% 54% 46% / 49% 60% 40% 51%; }
+  28% { border-radius: 54% 46% 38% 62% / 49% 70% 30% 51%; }
+  42% { border-radius: 61% 39% 55% 45% / 61% 38% 62% 39%; }
+  56% { border-radius: 61% 39% 67% 33% / 70% 50% 50% 30%; }
+  70% { border-radius: 50% 50% 34% 66% / 56% 68% 32% 44%; }
+  84% { border-radius: 46% 54% 50% 50% / 35% 61% 39% 65%; }
+}
+
+.menu-icon:checked ~ .nav {
+  animation-play-state: paused;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  width: 200%;
+  height: 200%;
+  transition: top 350ms 700ms cubic-bezier(0.23, 1, 0.32, 1),
+              right 350ms 700ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 250ms 700ms ease,
+              width 750ms 1000ms cubic-bezier(0.23, 1, 0.32, 1),
+              height 750ms 1000ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nav ul{
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  z-index: 6;
+  text-align: center;
+  transform: translateY(-50%);
+  list-style: none;
+}
+.nav ul li{
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 10px 0;
+  text-align: center;
+  list-style: none;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(30px);
+  transition: all 250ms linear;
+}
+.nav ul li:nth-child(1){
+  transition-delay: 200ms;
+}
+.nav ul li:nth-child(2){
+  transition-delay: 150ms;
+}
+.nav ul li:nth-child(3){
+  transition-delay: 100ms;
+}
+.nav ul li:nth-child(4){
+  transition-delay: 50ms;
+}
+.nav ul li a{
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9vh;
+  text-transform: uppercase;
+  line-height: 1.2;
+  font-weight: 800;
+  display: inline-block;
+  position: relative;
+  color: #ececee;
+  transition: all 250ms linear;
+}
+.nav ul li a:hover{
+  text-decoration: none;
+  color: #ffeba7;
+}
+.nav ul li a:after{
+  display: block;
+  position: absolute;
+  top: 50%;
+  content: '';
+  height: 2vh;
+  margin-top: -1vh;
+  width: 0;
+  left: 0;
+  background-color: #353746;
+  opacity: 0.8;
+  transition: width 250ms linear;
+}
+.nav ul li a:hover:after{
+  width: 100%;
+}
+
+
+.menu-icon:checked ~ .nav  ul li {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 350ms ease,
+              transform 250ms ease;
+}
+.menu-icon:checked ~ .nav ul li:nth-child(1){
+  transition-delay: 1400ms;
+}
+.menu-icon:checked ~ .nav ul li:nth-child(2){
+  transition-delay: 1480ms;
+}
+.menu-icon:checked ~ .nav ul li:nth-child(3){
+  transition-delay: 1560ms;
+}
+.menu-icon:checked ~ .nav ul li:nth-child(4){
+  transition-delay: 1640ms;
+}
+
+
+
+.logo {
+	position: absolute;
+	top: 60px;
+	left: 50px;
+	display: block;
+	z-index: 11;
+	transition: all 250ms linear;
+}
+.logo img {
+	height: 26px;
+	width: auto;
+	display: block;
+}
+
+
+
+@media screen and (max-width: 991px) {
+  .menu-icon:checked + label,
+  .menu-icon:not(:checked) + label{
+    right: 55px;
+  }
+  .logo {
+    left: 30px;
+  }
+  .nav{
+    right: 30px;
+  }
+  h1{
+    font-size: 9vw;
+    -webkit-text-stroke: 2px transparent;
+    text-stroke: 2px transparent;
+    -webkit-text-fill-color: #ffeba7;
+    text-fill-color: #ffeba7;
+    color: #ffeba7;
+  }
+  .nav ul li a{
+    font-size: 8vh;
+  }
+}
+    </style>
+</head>
+<body>
+  	<input class="menu-icon" type="checkbox" id="menu-icon" name="menu-icon"/>
+  	<label for="menu-icon"></label>
+  	<nav class="nav">
+  		<ul class="pt-5">
+  			<li><a href="{{ url_for('home') }}">Home</a></li>
+  			<li><a href="{{ url_for('supervised_learning')}}">Supervised learning</a></li>
+  			<li><a href="{{ url_for('natural_language_processing')}}">Natural Language Processing</a></li>
+  			<li><a href="{{ url_for('status') }}">Status</a></li>
+  		</ul>
+  	</nav>
+
+  	<div class="section-center" style="margin-top: 1400px">
+        <h1>result of running the SVC algorithm</h1>
+        <p>The SVC algorithm is a machine learning algorithm that works using "Support Vectors" - Support Vector Classification</p>
+        <p>The SVC algorithm is a classification algorithm that works by finding the best hyperplane to classify the data</p>
+        <p>A hyperplane is subspace that is one dimension less than the dimension of the data</p>
+        <p>For example, if our data was in 3D, the hyperplane would be a regular plane (2D)</p>
+        <p>If you look at 2D data, the hyperplane would be a line (1D)</p>
+        <p>The SVC algorithm finds the hyperplane that best classifies the data</p>
+        <p>The SVC algorithm is a classification algorithm that works by finding the best hyperplane to classify the data</p>
+        <p>There are several methods (formally called "kernels") to calculate the hyperplane, the most popular by far are Linear, Poly, and rbf (Radial Basis Function)</p>
+        <p>SVC works by using two Support Vectors (Hence the name), They pick two points which describe the separation of the data the best way, and then they create the hyperplane between the two. with a margin between each of them trying to be as exact as possible in the middle</p>
+        <p>How one might choose how big or small should the margin be? We have a parameters "C" - Regularization parameter - the "C" parameters defines how regularized should the hyperplane be. For example in 2D defines how "hard" should be the margin between the Support Vectors</p>
+        <p>A low value of C creates a soft margin as shown below</p>
+        <img src="{{ url_for('static', filename='images/SVC_soft_margin.png') }}" alt="svc soft margin">
+        <p>A high value of C creates a hard margin as shown below</p>
+        <img src="{{ url_for('static', filename='images/SVC_hard_margin.png') }}" alt="svc hard margin">
+        <p>A low value for C - soft margin - is used to get a general boundary and not to give so much attention to the outliers.</p>
+        <p>The problem that rises with a low C is that some points are considered on purpose False, to get a general classification - Called Under-Fitting.</p>
+        <p>Under-Fitting is when you are not giving enough attention to details.</p>
+        <p>A high value for C - hard margin - is used to get a more exact boundary and not to give so much attention to the outliers.</p>
+        <p>The problem that rises with a high C is that we are missing a lot of general space because of specific outliers, which are effecting our chances of getting a general model. This problem is called Over-Fitting</p>
+        <p>Over-Fitting is when are model is not general enough and depends too much on our data. Giving too much attention for outliers </p>
+        <br>
+        <p>The next kernel is the "Poly" kernel.</p>
+        <p>This model is used to classify data that is not linearly separable. Data such as below:</p>
+        <img src="{{ url_for('static', filename='images/SVC_poly_data.png') }}" alt="svc poly data">
+        <p>The Poly kernel turns the data into one dimension higher by a set of rules, and then projects the data back into the original dimension</p>
+        <p>For example, non-linearly separable data like above in 2D is turned 3D like below:</p>
+        <img src="{{ url_for('static', filename='images/SVC_poly_transformed.png') }}" alt="svc poly transformed">
+        <p>Now, the algorithm projects the 3D data back into 2D, and we get the result below:</p>
+        <img src="{{ url_for('static', filename='images/SVC_poly_result.png') }}" alt="svc poly result">
+        <p>And now for the golden crown "RBF" - Radial Bias Function</p>
+        <p>The RBF kernel is used to create a decision boundary for complex data, for example, we can look at the data our algorithm ran!</p>
+        <p>Our algorithm tries to predict if a pitch is a strike or a ball by using the distance in the X and Y direction from the plate</p>
+        <p>Here is the scatter plot of our data, red is a strike, blue is a ball.</p>
+        <img src="{{ url_for('static', filename='jobs/' + job_id + '/scatter.png') }}" alt="scatter plot of data">
+        <p>Pretty difficult to draw a line, huh? Let's see how are algorithm did!</p>
+        <img src="{{ url_for('static', filename='jobs/' + job_id + '/plot.png') }}" alt="algorithm result">
+        <p>Wow! how did our algorithm did that?! a "rbf" kernel also transforms our data into higher dimensions, but unlike Poly which transforms one dimension higher, "rbf" transforms our data to have as many dimensions as needed! The math is fairly complicated, But essentially it does the same as the Poly kernel, just with a lot more dimensions</p>
+        <p>So, How did our algorithm do you are asking? let's see it's score!</p>
+        <h4>Score: {{ score }} % of the classifications are correct!</h4>
+    </div>
+</body>
+</html>
