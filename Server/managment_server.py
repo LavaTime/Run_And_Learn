@@ -1,8 +1,9 @@
-# echo-server
+# Imports
 import os
 import socket
 from os import mkdir
 from threading import Thread
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -12,16 +13,25 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import scale
 from sklearn.svm import SVC
 
-from svm_visualization import draw_boundary
 from players import return_player_data
+from svm_visualization import draw_boundary
 
+# Constants
 HOST = '127.0.0.1'
 PORT = 25566
 
+
+# Lock Dictionary for file reading and writing
 lock_check = {'id': 'isLocked => Bool'}  # Add dynamic lock_check creation
 
 
 def update_status(job_id, status):
+    """
+    Update the status file of the job when free
+    :param job_id:
+    :param status:
+    :return:
+    """
     while lock_check[job_id]:
         pass
     lock_check[job_id] = True
@@ -32,6 +42,11 @@ def update_status(job_id, status):
 
 
 def read_status(job_id):
+    """
+    Read the status file of the job when free
+    :param job_id:
+    :return:
+    """
     while lock_check[job_id]:
         pass
     lock_check[job_id] = True
@@ -42,26 +57,39 @@ def read_status(job_id):
     return status
 
 
-# t = Thread(target=read_status, args=['0'])
-# t.start()
 
 def send_file(s, file):
+    """
+    Send file to client by sending the file size, wait for confirmation and then the file
+    :param s:
+    :param file:
+    :return:
+    """
     s.sendall(str(len(file)).encode())
     s.recv(1024)
     s.sendall(file)
 
 
 def do_job(conn, addr):
+    """
+    Function to run on the thread
+    :param conn:
+    :param addr:
+    :return:
+    """
     while True:
         data = conn.recv(1024).decode()
         if not data:
             break
+        # When data is received split it to get the job_id and the algorithm id by the delimiter "|"
         split_data = data.split('|')
         job_id, algorithm_id = split_data[:2]
         if algorithm_id == '1':
+            # If the algorithm id is 1 then it is to return a table of all the jobs
             jobs = pd.DataFrame(columns=['job_id', 'Status', 'Link to informative page'])
             jobs_dir = os.fsencode('Jobs/')
             for dir in os.listdir(jobs_dir):
+                "Get all the folders of the jobs"
                 current_job_id = dir.decode()
                 status = read_status(str(current_job_id))
                 with open('Jobs/' + current_job_id + '/desc.txt', 'r') as f:
@@ -76,6 +104,7 @@ def do_job(conn, addr):
             conn.sendall(encoded_jobs.encode())
             break
         elif algorithm_id == '2':
+            # Return to the web server which job to run next by checking the max folder
             d = './Jobs'
             subdirs = list(os.walk(d))[0][1]
             subdirs = list(map(int, subdirs))
@@ -88,6 +117,7 @@ def do_job(conn, addr):
             conn.sendall(str(jobs_count).encode())
             break
         elif algorithm_id == '3':
+            # Return the results of an algorithm by loading and sending the images. (Which images depend on the desc file of the job)
             with open('Jobs/' + job_id + '/desc.txt', 'r') as f:
                 desc = f.read()
                 if desc == 'SVC':
@@ -131,12 +161,13 @@ def do_job(conn, addr):
                     send_file(conn, prediction.encode())
                     prediction_file.close()
                     break
-
+        # Continue splitting the data using the delimiter to get the parameters for the machine learning algorithm
         split_data = split_data[2:]
         mkdir('Jobs/' + job_id)
         lock_check[job_id] = False
         update_status(job_id, 'Started')
         if algorithm_id == '0':  # SVC
+            # Here the status tells what is going on
             update_status(job_id, 'Algorithm found: SVC')  # Status
             with open('Jobs/' + job_id + '/desc.txt', 'w') as f:
                 f.write('SVC')
@@ -177,7 +208,6 @@ def do_job(conn, addr):
             score = classifier.score(validation_set[['plate_x', 'plate_z']], validation_set['type'])
             update_status(job_id, 'SVC: saving plot and score')  # Status
             fig.savefig('Jobs/' + job_id + '/plot.png')
-            #ax.clf()
             with open('Jobs/' + job_id + '/score.txt', 'w') as f:
                 f.write(str(score))
                 f.close()
@@ -247,6 +277,7 @@ def do_job(conn, addr):
             update_status(job_id, 'KNN: splitting data')  # Status
             training_data, validation_data, training_labels, validation_labels = train_test_split(scaled_data, labels, test_size=0.2)
             update_status(job_id, 'KNN: training and testing models')  # Status
+            # Create 200 models each with different K value and plot the accuracy for each K value
             scores = []
             max_score = -1
             best_classifier = None
@@ -285,7 +316,7 @@ def do_job(conn, addr):
             update_status(job_id, 'KNN: finished')  # Status
 
 
-
+# Run the program as threads for multiple clients at the same time.
 threads = []
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

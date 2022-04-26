@@ -18,6 +18,10 @@ algorithm_id_dict = {'SVC': '0', 'Get_jobs': '1', 'Get_job_counter': '2', 'Get_r
 
 
 def create_app():
+    """
+    Create and configure an instance of the Flask application. Connect to the management server.
+    :return:
+    """
     app = Flask(__name__)
     Bootstrap(app)
     global job_counter
@@ -49,6 +53,10 @@ def natural_language_processing():
 
 @app.route('/repos/supervised-learning/svm', methods=['GET', 'POST'])
 def svm():
+    """
+    SVM algorithm page, get player name and start and end date. if Post then call server and redirect to status
+    :return:
+    """
     if request.method == 'GET':
         form = player_params_form()
         form.process()
@@ -59,10 +67,16 @@ def svm():
         end_date = request.form['end_date']
         call_svm(player_name, start_date, end_date)
         return redirect(url_for('status'))
-        # return render_template('table_display.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
 
 
 def call_svm(player_name, start_date, end_date):
+    """
+    Call server to run SVM algorithm
+    :param player_name:
+    :param start_date:
+    :param end_date:
+    :return:
+    """
     # call server svm
     global job_counter
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -72,18 +86,12 @@ def call_svm(player_name, start_date, end_date):
     job_counter += 1
 
 
-# @app.route('/plot.png')
-# def plot_png():
-#     df = pd.read_pickle('./Baseball_Strike_Zones_SVM/temp_dfs/current.pkl')
-#     os.remove('./Baseball_Strike_Zones_SVM/temp_dfs/current.pkl')
-#     print('Session[df] is: ', df)
-#     fig, score = return_fig(df)
-#     output = io.BytesIO()
-#     FigureCanvas(fig).print_png(output)
-#     return Response(output.getvalue(), mimetype='image/png')
-
 @app.route('/repos/supervised-learning/linear-regression', methods=['GET', 'POST'])
 def linear_regression():
+    """
+    Linear Regression algorithm page, get start year and end year. if Post then call server and redirect to status
+    :return:
+    """
     if request.method == 'GET':
         form = PredictForm()
         form.process()
@@ -96,6 +104,12 @@ def linear_regression():
 
 
 def call_linear_regression(start_year, end_year):
+    """
+    Call server to run Linear Regression algorithm
+    :param start_year:
+    :param end_year:
+    :return:
+    """
     # call server linear regression
     global job_counter
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -107,6 +121,10 @@ def call_linear_regression(start_year, end_year):
 
 @app.route('/repos/natural-language-processing/k-nearest-neighbors', methods=['GET', 'POST'])
 def k_nearest_neighbors():
+    """
+    K-Nearest Neighbors algorithm page, tweet length, followers count, and friends count. if Post then call server and redirect to status
+    :return:
+    """
     if request.method == 'GET':
         form = get_tweets_data()
         form.process()
@@ -120,6 +138,13 @@ def k_nearest_neighbors():
 
 
 def call_k_nearest_neighbors(tweet_length, followers_count, friends_count):
+    """
+    Call server to run K-Nearest Neighbors algorithm
+    :param tweet_length:
+    :param followers_count:
+    :param friends_count:
+    :return:
+    """
     # call server k nearest neighbors
     global job_counter
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -131,6 +156,11 @@ def call_k_nearest_neighbors(tweet_length, followers_count, friends_count):
 
 @app.route('/KNN/job/<job_id>', methods=['GET'])
 def k_nearest_neighbors_job_view(job_id):
+    """
+    Check if this job result files are cached, if not cache them and then view the results.
+    :param job_id:
+    :return:
+    """
     if not os.path.exists('./static/jobs/' + job_id):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((Work_server, PORT))
@@ -161,6 +191,11 @@ def k_nearest_neighbors_job_view(job_id):
 
 @app.route('/Linear-Regression/job/<job_id>', methods=['GET'])
 def linear_regression_job_view(job_id):
+    """
+    Check if this job result files are cached, if not cache them and then view the results.
+    :param job_id:
+    :return:
+    """
     if not os.path.exists('./static/jobs/' + job_id):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((Work_server, PORT))
@@ -185,6 +220,11 @@ def linear_regression_job_view(job_id):
 
 @app.route('/status')
 def status():
+    """
+    get from the server the table of jobs, then if empty return to error page, if not, transform and remove links which are not finished
+    then give the table to the render_template function
+    :return:
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((Work_server, PORT))
         s.sendall('0|'.encode() + algorithm_id_dict['Get_jobs'].encode())
@@ -202,6 +242,11 @@ def status():
 
 @app.route('/SVC/job/<job_id>', methods=['GET'])
 def SVC_job_view(job_id):
+    """
+    Check if this job result files are cached, if not cache them and then view the results.
+    :param job_id:
+    :return:
+    """
     if not os.path.exists('./static/jobs/' + job_id):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((Work_server, PORT))
@@ -230,6 +275,11 @@ def SVC_job_view(job_id):
 
 @app.after_request
 def add_header(r):
+    """
+    Used for debugging
+    :param r:
+    :return:
+    """
     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     r.headers["Pragma"] = "no-cache"
     r.headers["Expires"] = "0"
@@ -237,6 +287,11 @@ def add_header(r):
     return r
 
 def get_file(s):
+    """
+    get the file from the server by getting the size, and then continuously read the file bytes until finished.
+    :param s:
+    :return:
+    """
     size_bytes = s.recv(1024)
     size = int(size_bytes.decode())
     s.sendall('k'.encode())
@@ -255,11 +310,3 @@ def page_not_found(e):
 def internal_server(e):
     return render_template('error.html', error_message='Internal server error',
                            link=url_for('home'), link_text='Home')
-
-
-
-#if __name__ == '__main__':
-#    app.run(
-#        host="0.0.0.0",
-#        port=5000
-#    )

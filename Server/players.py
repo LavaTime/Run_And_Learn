@@ -1,5 +1,6 @@
-from pybaseball import statcast_pitcher
 from pybaseball import playerid_lookup
+from pybaseball import statcast_pitcher
+
 
 def return_player_data(player_name, start_date, end_date):
     """
@@ -19,15 +20,3 @@ def return_player_data(player_name, start_date, end_date):
         player_data = statcast_pitcher('2008-04-01', '2017-07-15', player_id=player_id)[['type', 'plate_x', 'plate_z']]
     return player_data
 
-
-#return_player_data('Chris sale')
-
-# return player_id
-# player_data = playerid_lookup('Judge', 'Aaron')
-# print(player_data.columns)
-# playerid = player_data['key_mlbam'][0]
-# print(playerid)
-#
-# aaron_judge = statcast_pitcher('2008-04-01', '2017-07-15', player_id=playerid)
-# print(aaron_judge.head())
-# print(aaron_judge.columns)
