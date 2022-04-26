@@ -32,7 +32,6 @@ def update_status(job_id, status):
 
 
 def read_status(job_id):
-    print(lock_check)
     while lock_check[job_id]:
         pass
     lock_check[job_id] = True
@@ -49,21 +48,17 @@ def read_status(job_id):
 def send_file(s, file):
     s.sendall(str(len(file)).encode())
     s.recv(1024)
-    print('Sent:', str(len(file)).encode())
     s.sendall(file)
 
 
 def do_job(conn, addr):
-    print('Connected by', addr)
     while True:
         data = conn.recv(1024).decode()
         if not data:
             break
-        print(data)
         split_data = data.split('|')
         job_id, algorithm_id = split_data[:2]
         if algorithm_id == '1':
-            print('Get all jobs call received')
             jobs = pd.DataFrame(columns=['job_id', 'Status', 'Link to informative page'])
             jobs_dir = os.fsencode('Jobs/')
             for dir in os.listdir(jobs_dir):
@@ -72,34 +67,27 @@ def do_job(conn, addr):
                 with open('Jobs/' + current_job_id + '/desc.txt', 'r') as f:
                     desc = f.read()
                     f.close()
-                print('<a href=http://77.126.169.99:5000/' + desc + '/job/' + current_job_id + '>' + current_job_id + '</a>')
                 jobs = pd.concat([jobs, pd.DataFrame([[current_job_id, status,
                                                        '<a href=http://77.126.169.99:5000/' + desc + '/job/' + current_job_id + '>' + current_job_id + '</a>']],
                                                      columns=['job_id', 'Status', 'Link to informative page'])],
                                  ignore_index=True)
 
             encoded_jobs = jobs.to_json()
-            print(jobs)
             conn.sendall(encoded_jobs.encode())
-            print('Get all jobs call finished')
             break
         elif algorithm_id == '2':
-            print('Get job counter received')
             d = './Jobs'
             subdirs = list(os.walk(d))[0][1]
-            print(subdirs)
             subdirs = list(map(int, subdirs))
             if subdirs == [''] or subdirs == []:
                 jobs_count = 0
             else:
                 jobs_count = str(max(subdirs) + 1)
                 for i in range(int(jobs_count)):
-                    print(i)
                     lock_check[str(i)] = False
             conn.sendall(str(jobs_count).encode())
             break
         elif algorithm_id == '3':
-            print('Get results')
             with open('Jobs/' + job_id + '/desc.txt', 'r') as f:
                 desc = f.read()
                 if desc == 'SVC':
@@ -108,7 +96,6 @@ def do_job(conn, addr):
                     send_file(conn, scatter_img)
                     scatter_img_file.close()
                     plot_img_file = open('Jobs/' + job_id + '/plot.png', 'rb')
-                    print('a')
                     plot_img = plot_img_file.read()
                     send_file(conn, plot_img)
                     plot_img_file.close()
@@ -117,7 +104,6 @@ def do_job(conn, addr):
                     send_file(conn, score.encode())
                     score_file.close()
                     send_file(conn, desc.encode())
-                    print('sent results')
                     break
                 if desc == 'Linear-Regression':
                     scatter_img_file = open('Jobs/' + job_id + '/scatter.png', 'rb')
@@ -129,7 +115,6 @@ def do_job(conn, addr):
                     send_file(conn, plot_img)
                     plot_img_file.close()
                     send_file(conn, desc.encode())
-                    print('sent results')
                     break
                 if desc == 'KNN':
                     k_score_file = open('Jobs/' + job_id + '/k_scores.png', 'rb')
@@ -145,16 +130,13 @@ def do_job(conn, addr):
                     prediction = prediction_file.read()
                     send_file(conn, prediction.encode())
                     prediction_file.close()
-                    print('sent results')
                     break
 
         split_data = split_data[2:]
-        print('Job ID: ', job_id, 'Received')
         mkdir('Jobs/' + job_id)
         lock_check[job_id] = False
         update_status(job_id, 'Started')
         if algorithm_id == '0':  # SVC
-            print('SVC call received')
             update_status(job_id, 'Algorithm found: SVC')  # Status
             with open('Jobs/' + job_id + '/desc.txt', 'w') as f:
                 f.write('SVC')
@@ -163,9 +145,7 @@ def do_job(conn, addr):
             start_date = split_data[1]
             end_date = split_data[2]
             update_status(job_id, 'SVC: retrieving player data')  # Status
-            print(start_date, end_date)
             player_data = return_player_data(player_name, start_date, end_date)
-            print(player_data)
             # Add player caching
             update_status(job_id, 'SVC: cleaning data')  # Status
             plt.rcParams['figure.dpi'] = 150  # -------------------------------
@@ -203,7 +183,6 @@ def do_job(conn, addr):
                 f.close()
             update_status(job_id, 'SVC: finished')  # Status
         elif algorithm_id == '4':  # Linear regression
-            print('Linear regression call received')
             update_status(job_id, 'Algorithm found: Linear Regression')  # Status
             with open('Jobs/' + job_id + '/desc.txt', 'w') as f:
                 f.write('Linear-Regression')
@@ -245,7 +224,6 @@ def do_job(conn, addr):
             # ax.clf()
             update_status(job_id, 'Linear Regression: finished')  # Status
         elif algorithm_id == '5':  # KNN
-            print('KNN call received')
             update_status(job_id, 'Algorithm found: KNN')  # Status
             with open('Jobs/' + job_id + '/desc.txt', 'w') as f:
                 f.write('KNN')

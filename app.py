@@ -25,7 +25,6 @@ def create_app():
         s.connect((Work_server, PORT))
         s.sendall('0|2'.encode())
         job_counter = int(s.recv(1024).decode())
-        print(job_counter)
     return app
 
 
@@ -55,7 +54,6 @@ def svm():
         form.process()
         return render_template('get_player_params.html', form=form)
     if request.method == 'POST':
-        print(request.form)
         player_name = request.form['player_name']
         start_date = request.form['start_date']
         end_date = request.form['end_date']
@@ -114,7 +112,6 @@ def k_nearest_neighbors():
         form.process()
         return render_template('get_tweets_data.html', form=form)
     if request.method == 'POST':
-        print(request.form)
         tweet_length = request.form['tweet_length']
         followers_count = request.form['followers_count']
         friends_count = request.form['friends_count']
@@ -139,11 +136,8 @@ def k_nearest_neighbors_job_view(job_id):
             s.connect((Work_server, PORT))
             s.sendall(str(job_id).encode() + '|'.encode() + algorithm_id_dict['Get_results'].encode())
             k_score = get_file(s)
-            print('k_score is: ', k_score)
-            print('a')
             scatter_3d = get_file(s)
             desc = get_file(s)
-            print('d')
             prediction = get_file(s)
             os.mkdir('./static/jobs/' + job_id)
             with open('./static/jobs/' + job_id + '/k_score.png', 'wb') as f:
@@ -172,12 +166,8 @@ def linear_regression_job_view(job_id):
             s.connect((Work_server, PORT))
             s.sendall(str(job_id).encode() + '|'.encode() + algorithm_id_dict['Get_results'].encode())
             scatter_img = get_file(s)
-            print('scatter_img is: ', scatter_img)
-            print('a')
             plot_img = get_file(s)
-            print('b')
             desc = get_file(s)
-            print('d')
             os.mkdir('./static/jobs/' + job_id)
             with open('./static/jobs/' + job_id + '/scatter.png', 'wb') as f:
                 f.write(scatter_img)
@@ -202,7 +192,6 @@ def status():
         if jobs.empty:
             return render_template('error.html', error_message='No jobs'
                                    , link=url_for('home'), link_text='Home')
-        print('jobs is: ', jobs)
         jobs.loc[~jobs['Status'].str.contains('finished'), 'Link to informative page'] = 'loading'
         jobs['job_id'] = pd.to_numeric(jobs['job_id'], errors='coerce').fillna(0).astype(np.int64)
         jobs.set_index('job_id', inplace=True)
@@ -218,14 +207,9 @@ def SVC_job_view(job_id):
             s.connect((Work_server, PORT))
             s.sendall(str(job_id).encode() + '|'.encode() + algorithm_id_dict['Get_results'].encode())
             scatter_img = get_file(s)
-            print('scatter_img is: ', scatter_img)
-            print('a')
             plot_img = get_file(s)
-            print('b')
             score = get_file(s)
-            print('c')
             desc = get_file(s)
-            print('d')
             os.mkdir('./static/jobs/' + job_id)
             with open('./static/jobs/' + job_id + '/scatter.png', 'wb') as f:
                 f.write(scatter_img)
@@ -254,17 +238,12 @@ def add_header(r):
 
 def get_file(s):
     size_bytes = s.recv(1024)
-    print('size_bytes is: ', size_bytes)
     size = int(size_bytes.decode())
-    print('size is: ', size)
-    print('g')
     s.sendall('k'.encode())
     data = b''
     while len(data) < size:
         left_to_read = size - len(data)
-        print('left_to_read is: ', left_to_read)
         data += s.recv(4096 if left_to_read > 4096 else left_to_read)
-    print('h')
     return data
 
 @app.errorhandler(404)
