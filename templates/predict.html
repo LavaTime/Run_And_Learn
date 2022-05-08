@@ -334,6 +334,10 @@ h1{
   	</nav>
   	<div class="section-center">
         <h1 style="font-size: 3vw">Honey production - Linear Regression</h1>
+        <p>This algorithm uses linear regression to predict the decrease in honey production in the US.</p>
+        <p>Enter the start year and end year for the predictions</p>
+        <p>After the algorithm finishes you can view a graph with a prediction line for the entered year</p>
+        <p>The algorithm bases on data from "Honey Production in the USA (1998-2012)" - Jessica Li - Kaggle</p>
   		<form name="predict" action="{{ url_for('linear_regression') }}" method="post">
             {{ form.csrf_token }}
             {{ form.hidden_tag() }}

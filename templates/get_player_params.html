@@ -334,6 +334,21 @@ h1{
   	</nav>
   	<div class="section-center">
         <h1>Baseball player strike zones</h1>
+        <p>This algorithm analyzes the "Strike Zone" for a player in baseball</p>
+        <p>The algorithm pulls from a remote API the data for a player</p>
+        <p>to run our algorithm we need to provide him with parameters to know which data to pull</p>
+        <p>The parameters are: The name of the player, the dates for which time of the players career do we want to take as data</p>
+        <p>The algorithm tests for the X and Z axis distance from the center and marks the Strike and Ball as red and blue in correlation</p>
+        <p>We will see a graph with a blue/red mask which shows which area our algorithm will mark as which option</p>
+        <p>important note! We can use only the players which are included in the API. If a data for this player and date doesn't exist the program will revert to default values which included a big dataset</p>
+        <p>
+            Example inputs:<br>
+            Chris Sale, 04/01/2008, 07/15/2017<br>
+            Gerrit Cole, 04/01/2017, 07/15/2017
+        </p>
+        <p>
+            The data is retrieved from the "pybaseball" API
+        </p>
         <form name="get_player_params" action="{{ url_for('svm') }}" method="post">
             {{ form.hidden_tag() }}
             {{ form.player_name.label }}

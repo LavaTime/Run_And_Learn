@@ -334,6 +334,21 @@ h1{
   	</nav>
   	<div class="section-center">
         <h1>Check if tweet is viral</h1>
+        <p>
+            This algorithm tries to guess if a tweet will be viral or not based on the following parameters:<br>
+            <ul>
+                <li>The tweet length</li>
+                <li>the followers of the tweeter</li>
+                <li>the friends of the tweeter</li>
+            </ul>
+            This algorithm shows how we as humans know that these parameters or not really effective to determine if a tweet is viral or not.<br>
+            more useful parameters are focused on the context, structure of language, images or hashtags in the tweet.<br>
+            but the algorithm is still able to find certain patterns in the tweet and guess if it is viral or not.<br>
+            To use the algorithm enter data for a tweet to be checked against the algorithm.
+        </p>
+        <p>
+            The algorithms is based on the dataset of random tweets from Codecademy.
+        </p>
         <form name="get_tweets_data" action="{{ url_for('k_nearest_neighbors') }}" method="post">
             {{ form.hidden_tag() }}
             {{ form.tweet_length.label }}

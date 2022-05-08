@@ -96,7 +96,7 @@ def do_job(conn, addr):
                     desc = f.read()
                     f.close()
                 jobs = pd.concat([jobs, pd.DataFrame([[current_job_id, status,
-                                                       '<a href=http://77.126.169.99:5000/' + desc + '/job/' + current_job_id + '>' + current_job_id + '</a>']],
+                                                       '<a href=http://' + HOST + ':5000/' + desc + '/job/' + current_job_id + '>' + current_job_id + '</a>']],
                                                      columns=['job_id', 'Status', 'Link to informative page'])],
                                  ignore_index=True)
 
